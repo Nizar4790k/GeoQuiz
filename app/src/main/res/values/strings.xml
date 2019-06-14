@@ -16,4 +16,5 @@
     <string name="correct_toast">Correct!</string>
     <string name="incorrect_toast">Incorrect!</string>
     <string name= "prev_button">Prev</string>
+    <string name="score_message">Your score is : </string>
 </resources>
