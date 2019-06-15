@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             answered=savedInstanceState.getBooleanArray(ANSWERED);
 
 
-            /*
+
             for(int i=0;i<answered.length;i++){
                 mQuestionBank[i].setAnswered(answered[i]);
                 if(i==mCurrentIndex){
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
-            */
+
 
 
         }
