@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-            for(int i=0;i<answered.length;i++){
+               for(int i=0;i<answered.length;i++){
                 mQuestionBank[i].setAnswered(answered[i]);
                 if(i==mCurrentIndex){
                     disableButtons(mQuestionBank[i].getAnswered());
