@@ -22,4 +22,7 @@
     <string name="show_answer_button">Show Answer</string>
     <string name="cheat_button">Cheat!</string>
     <string name="judgment_toast">Cheating is wrong.</string>
+    <string name="api_level">API Level  </string>
+    <string name="cheat_limit">You reached the maximun cheats allowed</string>
+
 </resources>
