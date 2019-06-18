@@ -1,5 +1,8 @@
 package com.example.geoquiz;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,11 +18,17 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String KEY_INDEX = "index";
     private static final String ANSWERED="answered";
+    private  static  final int REQUEST_CODE_CHEAT=0;
+    private static final String TAG = "QuizActivity";
+    private static final String CHEATER="cheater";
+
+    private boolean mIsCheater;
 
 
 
     private Button mTrueButton;
     private Button mFalseButton;
+    private Button mCheatButton;
 
     private ImageButton mNextButton;
     private ImageButton mPreviousButton;
@@ -33,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean [] answered;
 
-    private static final String TAG = "QuizActivity";
+
     private double score=0;
 
     @Override
@@ -70,27 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        if (savedInstanceState != null) {
-            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
 
-
-
-            answered=savedInstanceState.getBooleanArray(ANSWERED);
-
-
-            /*
-            for(int i=0;i<answered.length;i++){
-                mQuestionBank[i].setAnswered(answered[i]);
-                if(i==mCurrentIndex){
-                    disableButtons(mQuestionBank[i].getAnswered());
-                }
-
-            }
-
-            */
-
-
-        }
 
 
 
@@ -147,10 +136,25 @@ public class MainActivity extends AppCompatActivity {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
 
                 disableButtons (mQuestionBank[mCurrentIndex].getAnswered());
+                mIsCheater = false;
                 updateQuestion();
 
 
 
+
+
+            }
+        });
+
+        mCheatButton = (Button)findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent intent = CheatActivity.newIntent(MainActivity.this,answerIsTrue);
+
+                startActivityForResult(intent,REQUEST_CODE_CHEAT);
 
 
             }
@@ -179,6 +183,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        if (savedInstanceState != null) {
+            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
+            mIsCheater=savedInstanceState.getBoolean(CHEATER);
+
+            answered=(boolean [])savedInstanceState.get(ANSWERED);
+
+
+
+
+
+               for(int i=0;i<answered.length;i++){
+                mQuestionBank[i].setAnswered(answered[i]);
+                if(i==mCurrentIndex){
+                    disableButtons(mQuestionBank[i].getAnswered());
+                }
+
+            }
+
+
+
+
+        }
+
+
 
 
         updateQuestion();
@@ -200,21 +228,38 @@ public class MainActivity extends AppCompatActivity {
 
         boolean isAnswerTrue =  mQuestionBank[mCurrentIndex].isAnswerTrue();
 
-        if(isAnswerTrue==userPressedTrue){
-            Toast toast= Toast.makeText(MainActivity.this,R.string.correct_toast,Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP,0,0);
-            toast.show();
-            score+=16.66667;
+        int messageResId=0;
+
+      if(mIsCheater){
+
+          messageResId = R.string.judgment_toast;
 
 
 
-        }else {
+      }else {
+          if(isAnswerTrue==userPressedTrue){
 
-            Toast toast= Toast.makeText(MainActivity.this,R.string.incorrect_toast,Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.TOP,0,0);
-            toast.show();
+              messageResId=R.string.correct_toast;
 
-        }
+              score+=16.66667;
+
+
+
+          }else {
+
+              messageResId=R.string.incorrect_toast;
+
+
+          }
+      }
+
+
+
+        Toast toast= Toast.makeText(MainActivity.this,messageResId,Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.TOP,0,0);
+        toast.show();
+
+
 
 
         String scoreDescription = getString(R.string.score_message);
@@ -236,10 +281,13 @@ public class MainActivity extends AppCompatActivity {
         if(answered){
             mTrueButton.setEnabled(false);
             mFalseButton.setEnabled(false);
+            mCheatButton.setEnabled(false);
         } else {
 
             mTrueButton.setEnabled(true);
             mFalseButton.setEnabled(true);
+            mCheatButton.setEnabled(true);
+
         }
 
     }
@@ -256,12 +304,11 @@ public class MainActivity extends AppCompatActivity {
 
         for(int i=0;i<mQuestionBank.length;i++){
             areAnswered[i]=mQuestionBank[i].getAnswered();
-            System.out.println(areAnswered[i]);
-
         }
 
 
         savedInstanceState.putBooleanArray(ANSWERED,areAnswered);
+        savedInstanceState.putBoolean(CHEATER,mIsCheater);
 
 
 
@@ -295,7 +342,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+        if (requestCode == REQUEST_CODE_CHEAT) {
+            if (data == null) {
+                return;
+            }
+            mIsCheater = CheatActivity.wasAnswerShown(data);
+        }
+    }
 }
